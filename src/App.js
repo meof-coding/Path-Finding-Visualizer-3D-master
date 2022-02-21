@@ -18,6 +18,13 @@ function App() {
     });
   }, []);
 
+  const gridsize = 24;
+  const griddivision = 20;
+
+  const initgrid = () => {
+    console.log("initgrid");
+  };
+
   return (
     <div
       id="canvas-container"
@@ -41,10 +48,18 @@ function App() {
           castShadow
         />
         <gridHelper
-          args={[24, 20, "#5c78bd", "#5c78bd"]}
+          args={[gridsize, griddivision, "#5c78bd", "#5c78bd"]}
           rotation={[0, 0, -0.075]}
           position={[0, 0.05, 0]}
         />
+
+        <mesh
+          rotation={[-Math.PI / 2, (Math.PI / 2) * 0.05, 0]}
+          position={[0.6, 0, 0.6 + 9 * (gridsize / griddivision)]}
+        >
+          <planeGeometry args={[24 / 20, 24 / 20, 3, 3]} />
+          <meshLambertMaterial color="red" />
+        </mesh>
         <OrbitControls />
       </Canvas>
     </div>
