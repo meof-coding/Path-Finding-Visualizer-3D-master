@@ -1,11 +1,9 @@
 // import logo from './logo.svg';
 import "./App.css";
 import { useState, useEffect } from "react";
-// import { Physics, useCylinder, usePlane } from '@react-three/cannon'
 import { Canvas, render, events } from "@react-three/fiber";
 import Ground from "./component/Ground.js";
 import { OrbitControls, TransformControls } from "@react-three/drei";
-import { GridHelper } from "three";
 
 function App() {
   const [size, setSize] = useState({
@@ -20,10 +18,66 @@ function App() {
 
   const gridsize = 24;
   const griddivision = 20;
-
-  const initgrid = () => {
-    console.log("initgrid");
+  let grid = [];
+  let start = {
+    row: 3,
+    col: 5,
   };
+  let finish = {
+    row: 16,
+    col: 18,
+  };
+
+  let colors = {
+    default: { r: 1, g: 1, b: 1 },
+    start: { r: 0, g: 1, b: 0 },
+    finish: { r: 1, g: 0, b: 0 },
+    wall: { r: 0.109, g: 0.109, b: 0.45 },
+    visited: { r: 0.329, g: 0.27, b: 0.968 },
+    path: { r: 1, g: 1, b: 0 },
+  };
+
+  const TWEEN = require("@tweenjs/tween.js");
+
+  useEffect(() => {
+    for (let row = 0; row < griddivision; row++) {
+      let currentRow = [];
+      for (let col = 0; col < griddivision; col++) {
+        let status = "default";
+        if (row === start.row && col === start.col) {
+          status = "start";
+        } else if (row === finish.row && col === finish.col) {
+          status = "finish";
+        }
+        let node = {
+          id: row * griddivision + col,
+          row: row,
+          col: col,
+          position: {
+            x: 0.6 + (10 - col + 1) * (gridsize / griddivision),
+            y: 0 - (0.85 - 0.9),
+            z: 0.6 + (10 - row + 1) * (gridsize / griddivision),
+          },
+          status: status,
+          distance: Infinity,
+          totalDistance: Infinity,
+          heuristicDistance: null,
+          direction: null,
+          weight: 0,
+          previousNode: null,
+        };
+        if (status === "start") {
+          // tweenToColor(node, this.ground.geometry, [this.colors.start])
+          TWEEN.Tween();
+        } else if (status === "finish") {
+          // tweenToColor(node, this.ground.geometry, [this.colors.finish])
+        }
+        currentRow.push(node);
+      }
+      grid.push(currentRow);
+    }
+    console.log(grid);
+  }, []);
 
   return (
     <div
@@ -49,17 +103,20 @@ function App() {
         />
         <gridHelper
           args={[gridsize, griddivision, "#5c78bd", "#5c78bd"]}
-          rotation={[0, 0, -0.075]}
           position={[0, 0.05, 0]}
         />
 
-        <mesh
-          rotation={[-Math.PI / 2, (Math.PI / 2) * 0.05, 0]}
-          position={[0.6, 0, 0.6 + 9 * (gridsize / griddivision)]}
+        {/* <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[
+            0.6 + (10 - 1) * (gridsize / griddivision),
+            0 - (0.85 - 0.9),
+            0.6 + (10 - 1) * (gridsize / griddivision),
+          ]}
         >
           <planeGeometry args={[24 / 20, 24 / 20, 3, 3]} />
           <meshLambertMaterial color="red" />
-        </mesh>
+        </mesh> */}
         <OrbitControls />
       </Canvas>
     </div>
