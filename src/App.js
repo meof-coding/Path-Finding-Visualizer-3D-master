@@ -10,6 +10,9 @@ function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  const [fakegrid, setfakegrid] = useState([]);
+
   useEffect(() => {
     window.addEventListener("resize", () => {
       setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -54,9 +57,9 @@ function App() {
           row: row,
           col: col,
           position: {
-            x: 0.6 + (10 - col + 1) * (gridsize / griddivision),
+            x: 0.6 + (9 - col) * (gridsize / griddivision),
             y: 0 - (0.85 - 0.9),
-            z: 0.6 + (10 - row + 1) * (gridsize / griddivision),
+            z: 0.6 + (9 - row) * (gridsize / griddivision),
           },
           status: status,
           distance: Infinity,
@@ -65,25 +68,37 @@ function App() {
           direction: null,
           weight: 0,
           previousNode: null,
+          color: "#BBC2D0",
         };
         if (status === "start") {
-          // tweenToColor(node, this.ground.geometry, [this.colors.start])
-          TWEEN.Tween();
+          node.color = "red";
         } else if (status === "finish") {
-          // tweenToColor(node, this.ground.geometry, [this.colors.finish])
+          node.color = "green";
         }
         currentRow.push(node);
       }
       grid.push(currentRow);
     }
-    console.log(grid);
+    setfakegrid(grid);
+    // console.log(grid);
   }, []);
+
+  const changecolor = () => {
+    let newGrid = [...fakegrid];
+    newGrid[1][0].color = "blue";
+    console.log(newGrid[0][0]);
+    setfakegrid(newGrid);
+  };
 
   return (
     <div
       id="canvas-container"
       style={{ width: size.width, height: size.height }}
     >
+      <button id="save" onClick={changecolor}>
+        Save
+      </button>
+
       <Canvas
         pixelRatio={window.devicePixelRatio}
         dpr={[1, 1.5]}
@@ -106,17 +121,20 @@ function App() {
           position={[0, 0.05, 0]}
         />
 
-        {/* <mesh
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[
-            0.6 + (10 - 1) * (gridsize / griddivision),
-            0 - (0.85 - 0.9),
-            0.6 + (10 - 1) * (gridsize / griddivision),
-          ]}
-        >
-          <planeGeometry args={[24 / 20, 24 / 20, 3, 3]} />
-          <meshLambertMaterial color="red" />
-        </mesh> */}
+        {fakegrid.map((row) => {
+          return row.map((node) => {
+            return (
+              <mesh
+                rotation={[-Math.PI / 2, 0, 0]}
+                position={[node.position.x, node.position.y, node.position.z]}
+              >
+                <planeGeometry args={[24 / 20, 24 / 20, 3, 3]} />
+                <meshLambertMaterial color={node.color} />
+              </mesh>
+            );
+          });
+        })}
+
         <OrbitControls />
       </Canvas>
     </div>
