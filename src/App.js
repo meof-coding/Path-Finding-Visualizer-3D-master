@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Canvas, render, events } from "@react-three/fiber";
 import Ground from "./component/Ground.js";
 import { OrbitControls, TransformControls } from "@react-three/drei";
+import { weightedSearchAlgorithm } from "./algorithm/weightedSearchAlgorithm";
 
 function App() {
   const [size, setSize] = useState({
@@ -83,11 +84,13 @@ function App() {
     // console.log(grid);
   }, []);
 
-  const changecolor = () => {
+  const visualizeAlgorithm = () => {
     let newGrid = [...fakegrid];
-    newGrid[1][0].color = "blue";
-    console.log(newGrid[0][0]);
-    setfakegrid(newGrid);
+    const startNode = newGrid[start.row][start.col];
+    const finishNode = newGrid[finish.row][finish.col];
+    let nodesToAnimate = [];
+    weightedSearchAlgorithm(newGrid, startNode, finishNode, nodesToAnimate);
+    // setfakegrid(newGrid);
   };
 
   return (
@@ -95,7 +98,7 @@ function App() {
       id="canvas-container"
       style={{ width: size.width, height: size.height }}
     >
-      <button id="save" onClick={changecolor}>
+      <button id="save" onClick={visualizeAlgorithm}>
         Save
       </button>
 
