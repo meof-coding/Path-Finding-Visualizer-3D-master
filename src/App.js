@@ -125,6 +125,7 @@ function App() {
           return row.map((node) => {
             return (
               <mesh
+                key={node.id}
                 rotation={[-Math.PI / 2, 0, 0]}
                 position={[node.position.x, node.position.y, node.position.z]}
               >
