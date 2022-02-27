@@ -9,13 +9,16 @@ export function weightedSearchAlgorithm(grid, start, target, nodesToAnimate) {
     if (currentNode.distance === Infinity) return false;
     //Create a set that keeps track of  vertices included in the shortest-path tree
     nodesToAnimate.push(currentNode);
+    if (currentNode.status !== "start" && currentNode.status !== "finish") {
+      currentNode.status = "visited";
+      //   currentNode.color = "blue";
+    }
 
-    currentNode.status = "visited";
     // Ending condition
     if (currentNode.id === target.id) return "success!";
     // Updating neighbors
     updateNeighbors(grid, currentNode);
-    console.log(nodesToAnimate);
+    // console.log(nodesToAnimate);
   }
 }
 
@@ -46,7 +49,7 @@ function getNeighbors(node, grid) {
   if (col < grid[0].length - 1) {
     neighbors.push(grid[row][col + 1]);
   }
-  return neighbors.filter((neighbor) => neighbor.status != "visited");
+  return neighbors.filter((neighbor) => neighbor.status !== "visited");
 }
 
 function closestNode(unvisitedNodes) {
@@ -68,7 +71,7 @@ function updateNode(currentNode, targetNode) {
   let distance = getDistance(currentNode, targetNode);
   let distanceToCompare;
   distanceToCompare = currentNode.distance + targetNode.weight + distance[0];
-  //   console.log(distanceToCompare, targetNode.distance);
+  //console.log(distanceToCompare, targetNode.distance);
   if (distanceToCompare < targetNode.distance) {
     targetNode.distance = distanceToCompare;
     targetNode.previousNode = currentNode;

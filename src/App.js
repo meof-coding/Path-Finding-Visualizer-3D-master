@@ -5,6 +5,8 @@ import { Canvas, render, events } from "@react-three/fiber";
 import Ground from "./component/Ground.js";
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import { weightedSearchAlgorithm } from "./algorithm/weightedSearchAlgorithm";
+import { getNodesInShortestPathOrder } from "./algorithm/helper";
+import { motion } from "framer-motion-3d";
 
 function App() {
   const [size, setSize] = useState({
@@ -25,20 +27,21 @@ function App() {
   let grid = [];
   let start = {
     row: 3,
-    col: 5,
+    col: 3,
   };
   let finish = {
-    row: 16,
+    row: 15,
     col: 18,
   };
 
-  let colors = {
-    default: { r: 1, g: 1, b: 1 },
-    start: { r: 0, g: 1, b: 0 },
-    finish: { r: 1, g: 0, b: 0 },
-    wall: { r: 0.109, g: 0.109, b: 0.45 },
-    visited: { r: 0.329, g: 0.27, b: 0.968 },
-    path: { r: 1, g: 1, b: 0 },
+  const variants = {
+    animate: {
+      color: "#f11625",
+    },
+    finished: {
+      color: "#f3ff52",
+    },
+    nothing: {},
   };
 
   const TWEEN = require("@tweenjs/tween.js");
@@ -70,6 +73,8 @@ function App() {
           weight: 0,
           previousNode: null,
           color: "#BBC2D0",
+          order: null,
+          shortestpath: null,
         };
         if (status === "start") {
           node.color = "red";
@@ -90,16 +95,67 @@ function App() {
     const finishNode = newGrid[finish.row][finish.col];
     let nodesToAnimate = [];
     weightedSearchAlgorithm(newGrid, startNode, finishNode, nodesToAnimate);
-    // setfakegrid(newGrid);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    for (let i = 0; i <= nodesToAnimate.length; i++) {
+      if (i === nodesToAnimate.length) {
+        for (let index = 0; index < nodesInShortestPathOrder.length; index++) {
+          const node = nodesInShortestPathOrder[index];
+          if (!node) return;
+          newGrid[node.row][node.col].order = null;
+          newGrid[node.row][node.col].shortestpath = index + 20;
+          console.log(newGrid[node.row][node.col]);
+        }
+        break;
+      }
+
+      if (
+        (nodesToAnimate[i].row === start.row &&
+          nodesToAnimate[i].col === start.col) ||
+        (nodesToAnimate[i].row === finish.row &&
+          nodesToAnimate[i].col === finish.col)
+      ) {
+        continue;
+      }
+
+      const node = nodesToAnimate[i];
+      if (!node) return;
+      newGrid[node.row][node.col].order = i;
+      // console.log(newGrid[node.row][node.col]);
+    }
+
+    setfakegrid(newGrid);
   };
 
+  // function animateAlgorithm(
+  //   visitedNodesInOrder,
+  //   nodesInShortestPathOrder,
+  //   timerDelay,
+  //   nodestart,
+  //   nodefinish
+  // ) {
+  //   for (let i = 0; i < visitedNodesInOrder.length; i++) {
+  //     if (
+  //       (visitedNodesInOrder[i].row === nodestart.row &&
+  //         visitedNodesInOrder[i].col === nodestart.col) ||
+  //       (visitedNodesInOrder[i].row === nodefinish.row &&
+  //         visitedNodesInOrder[i].col === nodefinish.col)
+  //     ) {
+  //       continue;
+  //     }
+  //     setTimeout(() => {
+  //       const node = visitedNodesInOrder[i];
+  //       if (!node) return;
+  //       tweenToColor(node);
+  //     });
+  //   }
+  // }
   return (
     <div
       id="canvas-container"
       style={{ width: size.width, height: size.height }}
     >
       <button id="save" onClick={visualizeAlgorithm}>
-        Save
+        Visualize Dijkstra Algorithm
       </button>
 
       <Canvas
@@ -127,14 +183,32 @@ function App() {
         {fakegrid.map((row) => {
           return row.map((node) => {
             return (
-              <mesh
+              <motion.mesh
                 key={node.id}
                 rotation={[-Math.PI / 2, 0, 0]}
                 position={[node.position.x, node.position.y, node.position.z]}
               >
                 <planeGeometry args={[24 / 20, 24 / 20, 3, 3]} />
-                <meshLambertMaterial color={node.color} />
-              </mesh>
+                <motion.meshLambertMaterial
+                  variants={variants}
+                  color={node.color}
+                  animate={
+                    node.order
+                      ? "animate"
+                      : node.shortestpath
+                      ? "finished"
+                      : "nothing"
+                  }
+                  transition={{
+                    duration: 1,
+                    delay: node.order
+                      ? node.norder / 10
+                      : node.shortestpath
+                      ? node.shortestpath / 10
+                      : 0,
+                  }}
+                />
+              </motion.mesh>
             );
           });
         })}
