@@ -15,7 +15,7 @@ function App() {
   });
 
   const [fakegrid, setfakegrid] = useState([]);
-
+  const [lastest, setLastest] = useState();
   useEffect(() => {
     window.addEventListener("resize", () => {
       setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -30,21 +30,22 @@ function App() {
     col: 3,
   };
   let finish = {
-    row: 15,
+    row: 3,
     col: 18,
   };
 
   const variants = {
     animate: {
       color: "#f11625",
+      scale: 1,
     },
     finished: {
-      color: "#f3ff52",
+      color: "#ffc642",
     },
     nothing: {},
   };
 
-  const TWEEN = require("@tweenjs/tween.js");
+  // const TWEEN = require("@tweenjs/tween.js");
 
   useEffect(() => {
     for (let row = 0; row < griddivision; row++) {
@@ -89,6 +90,7 @@ function App() {
     // console.log(grid);
   }, []);
 
+  //  useEffect(() => {
   const visualizeAlgorithm = () => {
     let newGrid = [...fakegrid];
     const startNode = newGrid[start.row][start.col];
@@ -96,16 +98,26 @@ function App() {
     let nodesToAnimate = [];
     weightedSearchAlgorithm(newGrid, startNode, finishNode, nodesToAnimate);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-    for (let i = 0; i <= nodesToAnimate.length; i++) {
-      if (i === nodesToAnimate.length) {
-        for (let index = 0; index < nodesInShortestPathOrder.length; index++) {
-          const node = nodesInShortestPathOrder[index];
-          if (!node) return;
-          newGrid[node.row][node.col].order = null;
-          newGrid[node.row][node.col].shortestpath = index + 20;
-          console.log(newGrid[node.row][node.col]);
-        }
-        break;
+    for (let i = 0; i <= nodesToAnimate.length - 1; i++) {
+      if (i === nodesToAnimate.length - 1) {
+        setLastest(i - 1);
+        setTimeout(() => {
+          console.log("setting");
+          for (
+            let index = 0;
+            index < nodesInShortestPathOrder.length;
+            index++
+          ) {
+            const node = nodesInShortestPathOrder[index];
+            if (!node) return;
+            // newGrid[node.row][node.col].order = null;
+            newGrid[node.row][node.col].status = "shortest";
+            newGrid[node.row][node.col].shortestpath = index;
+
+            // console.log(newGrid[node.row][node.col]);
+          }
+          setfakegrid(newGrid);
+        }, 2000);
       }
 
       if (
@@ -116,39 +128,16 @@ function App() {
       ) {
         continue;
       }
-
       const node = nodesToAnimate[i];
       if (!node) return;
       newGrid[node.row][node.col].order = i;
+      // console.log(node.order, newGrid.length);
       // console.log(newGrid[node.row][node.col]);
     }
 
     setfakegrid(newGrid);
+    console.log("1:", fakegrid);
   };
-
-  // function animateAlgorithm(
-  //   visitedNodesInOrder,
-  //   nodesInShortestPathOrder,
-  //   timerDelay,
-  //   nodestart,
-  //   nodefinish
-  // ) {
-  //   for (let i = 0; i < visitedNodesInOrder.length; i++) {
-  //     if (
-  //       (visitedNodesInOrder[i].row === nodestart.row &&
-  //         visitedNodesInOrder[i].col === nodestart.col) ||
-  //       (visitedNodesInOrder[i].row === nodefinish.row &&
-  //         visitedNodesInOrder[i].col === nodefinish.col)
-  //     ) {
-  //       continue;
-  //     }
-  //     setTimeout(() => {
-  //       const node = visitedNodesInOrder[i];
-  //       if (!node) return;
-  //       tweenToColor(node);
-  //     });
-  //   }
-  // }
   return (
     <div
       id="canvas-container"
@@ -193,19 +182,22 @@ function App() {
                   variants={variants}
                   color={node.color}
                   animate={
-                    node.order
+                    node.status === "visited"
                       ? "animate"
-                      : node.shortestpath
+                      : node.status === "shortest"
                       ? "finished"
                       : "nothing"
+                    // node.shortestpath ? "finish" : "nothing",
                   }
                   transition={{
                     duration: 1,
-                    delay: node.order
-                      ? node.norder / 10
-                      : node.shortestpath
-                      ? node.shortestpath / 10
-                      : 0,
+                    delay: node.order / 10,
+                    ease: "easeInOut",
+                  }}
+                  onAnimationComplete={() => {
+                    // if (node.order === lastest) {
+                    // }
+                    // console.log(fakegrid);
                   }}
                 />
               </motion.mesh>
