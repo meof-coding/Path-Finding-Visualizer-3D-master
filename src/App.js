@@ -15,7 +15,6 @@ function App() {
   });
 
   const [fakegrid, setfakegrid] = useState([]);
-  const [lastest, setLastest] = useState();
   useEffect(() => {
     window.addEventListener("resize", () => {
       setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -30,7 +29,7 @@ function App() {
     col: 3,
   };
   let finish = {
-    row: 3,
+    row: 15,
     col: 18,
   };
 
@@ -75,7 +74,6 @@ function App() {
           previousNode: null,
           color: "#BBC2D0",
           order: null,
-          shortestpath: null,
         };
         if (status === "start") {
           node.color = "red";
@@ -100,9 +98,9 @@ function App() {
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     for (let i = 0; i <= nodesToAnimate.length - 1; i++) {
       if (i === nodesToAnimate.length - 1) {
-        setLastest(i - 1);
+        console.log(i * 100 + 1000);
         setTimeout(() => {
-          console.log("setting");
+          newGrid = [...fakegrid];
           for (
             let index = 0;
             index < nodesInShortestPathOrder.length;
@@ -112,12 +110,12 @@ function App() {
             if (!node) return;
             // newGrid[node.row][node.col].order = null;
             newGrid[node.row][node.col].status = "shortest";
-            newGrid[node.row][node.col].shortestpath = index;
+            newGrid[node.row][node.col].order = index;
 
             // console.log(newGrid[node.row][node.col]);
           }
           setfakegrid(newGrid);
-        }, 2000);
+        }, i * 100 + 1000);
       }
 
       if (
